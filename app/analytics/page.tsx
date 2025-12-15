@@ -16,6 +16,13 @@ export default async function AnalyticsPage() {
   }
 
   const totalQuantityPerProduct = getTotalQuantityPerProduct(orders);
+  const totalRevenue = orders.reduce((sum, order) => {
+    const orderTotal = order.products.reduce(
+      (orderSum, product) => orderSum + product.quantity * product.item_price,
+      0
+    );
+    return sum + orderTotal;
+  }, 0);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black">
@@ -68,7 +75,7 @@ export default async function AnalyticsPage() {
           <h2 className="text-xl font-semibold text-black dark:text-white mb-4">
             Resumo Rápido
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <div className="text-2xl font-bold text-black dark:text-white">
                 {orders.length}
@@ -91,6 +98,14 @@ export default async function AnalyticsPage() {
               </div>
               <div className="text-sm text-zinc-600 dark:text-zinc-400">
                 Total de Itens Encomendados
+              </div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-black dark:text-white">
+                €{totalRevenue.toFixed(2)}
+              </div>
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                Total Faturado
               </div>
             </div>
           </div>

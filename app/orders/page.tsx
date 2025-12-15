@@ -10,7 +10,15 @@ const PICKUP_LOCATIONS = {
   cascais: 'Cascais',
 };
 
-export default async function OrdersPage() {
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    q?: string;
+    location?: string;
+    pickupDate?: string;
+  }>;
+}) {
   let orders: Order[] = [];
   let products: Product[] = [];
   let error = null;
@@ -26,6 +34,26 @@ export default async function OrdersPage() {
   const productUnitTypeMap = new Map<string, 'unit' | 'kg' | 'liters'>();
   products.forEach((p) => {
     productUnitTypeMap.set(p.name, p.unit_type);
+  });
+
+  const resolvedParams = (await searchParams) || {};
+  const query = (resolvedParams.q || '').toLowerCase().trim();
+  const selectedLocation = resolvedParams.location || '';
+  const selectedPickupDate = resolvedParams.pickupDate || '';
+
+  const filteredOrders = orders.filter((order) => {
+    const matchesQuery =
+      !query ||
+      order.client_name.toLowerCase().includes(query) ||
+      order.client_number.toLowerCase().includes(query);
+
+    const matchesLocation =
+      !selectedLocation || order.pickup_location === selectedLocation;
+
+    const matchesPickupDate =
+      !selectedPickupDate || order.pickup_date === selectedPickupDate;
+
+    return matchesQuery && matchesLocation && matchesPickupDate;
   });
 
   const getUnitLabel = (productName: string, quantity: number): string => {
@@ -58,6 +86,66 @@ export default async function OrdersPage() {
             Nova Encomenda
           </Link>
         </div>
+
+        <form className="bg-white dark:bg-zinc-900 rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              Cliente ou Número
+            </label>
+            <input
+              type="text"
+              name="q"
+              defaultValue={resolvedParams.q || ''}
+              placeholder="Pesquisar..."
+              className="w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:border-zinc-400 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              Local de Recolha
+            </label>
+            <select
+              name="location"
+              defaultValue={resolvedParams.location || ''}
+              className="w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:border-zinc-400 focus:outline-none"
+            >
+              <option value="">Todos</option>
+              {Object.entries(PICKUP_LOCATIONS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              Data de Recolha
+            </label>
+            <input
+              type="date"
+              name="pickupDate"
+              defaultValue={resolvedParams.pickupDate || ''}
+              className="w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:border-zinc-400 focus:outline-none"
+            />
+          </div>
+
+          <div className="flex items-end gap-2">
+            <button
+              type="submit"
+              className="w-full px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+            >
+              Aplicar
+            </button>
+            <Link
+              href="/orders"
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-center"
+            >
+              Limpar
+            </Link>
+          </div>
+        </form>
 
         {error && (
           <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -116,64 +204,75 @@ export default async function OrdersPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-200 dark:divide-zinc-800">
-                  {orders.map((order) => {
-                    const total = order.products.reduce(
-                      (sum, product) => sum + product.quantity * product.item_price,
-                      0
-                    );
-                    return (
-                      <tr key={order.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                          {order.client_name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
-                          {order.client_number}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
-                          {order.pickup_date
-                            ? new Date(order.pickup_date).toLocaleDateString('pt-PT')
-                            : '—'}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
-                          <div>
-                            {PICKUP_LOCATIONS[order.pickup_location]}
-                            {order.pickup_location === 'casa' && order.address && (
-                              <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
-                                {order.address}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
-                          {order.pickup_time || '—'}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
-                          <div className="space-y-1">
-                            {order.products.map((product, idx) => (
-                              <div key={idx}>
-                                {product.product_name} × {getUnitLabel(product.product_name, product.quantity)} @ €{product.item_price.toFixed(2)}
-                              </div>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                          €{total.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
-                          {order.created_at
-                            ? new Date(order.created_at).toLocaleDateString('pt-PT')
-                            : '—'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <OrderActions
-                            orderId={order.id!}
-                            clientNumber={order.client_number}
-                            clientName={order.client_name}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {filteredOrders.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="px-6 py-6 text-center text-sm text-zinc-500 dark:text-zinc-400"
+                      >
+                        Nenhuma encomenda corresponde aos filtros selecionados.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredOrders.map((order) => {
+                      const total = order.products.reduce(
+                        (sum, product) => sum + product.quantity * product.item_price,
+                        0
+                      );
+                      return (
+                        <tr key={order.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                            {order.client_name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+                            {order.client_number}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+                            {order.pickup_date
+                              ? new Date(order.pickup_date).toLocaleDateString('pt-PT')
+                              : '—'}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                            <div>
+                              {PICKUP_LOCATIONS[order.pickup_location]}
+                              {order.pickup_location === 'casa' && order.address && (
+                                <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
+                                  {order.address}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+                            {order.pickup_time || '—'}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                            <div className="space-y-1">
+                              {order.products.map((product, idx) => (
+                                <div key={idx}>
+                                  {product.product_name} × {getUnitLabel(product.product_name, product.quantity)} @ €{product.item_price.toFixed(2)}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                            €{total.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+                            {order.created_at
+                              ? new Date(order.created_at).toLocaleDateString('pt-PT')
+                              : '—'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <OrderActions
+                              orderId={order.id!}
+                              clientNumber={order.client_number}
+                              clientName={order.client_name}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>

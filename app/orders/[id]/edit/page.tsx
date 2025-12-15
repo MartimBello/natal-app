@@ -372,8 +372,8 @@ export default function EditOrderPage() {
                 className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
               >
                 <option value="">Selecione a data</option>
-                <option value="2024-12-23">23 de Dezembro</option>
-                <option value="2024-12-24">24 de Dezembro</option>
+                <option value="2025-12-23">23 de Dezembro</option>
+                <option value="2025-12-24">24 de Dezembro</option>
               </select>
             </div>
 

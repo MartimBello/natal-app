@@ -32,6 +32,10 @@ export function getTotalQuantityPerProduct(orders: Order[]): ProductTotal[] {
 
   orders.forEach((order) => {
     order.products.forEach((product) => {
+      // Exclude PERU RECHEADO and PERU SEM RECHEIO from totals
+      if (product.product_name === 'PERU RECHEADO' || product.product_name === 'PERU SEM RECHEIO') {
+        return;
+      }
       const current = productMap.get(product.product_name) || 0;
       productMap.set(product.product_name, current + product.quantity);
     });
@@ -89,5 +93,31 @@ export function getOrdersByCustomer(orders: Order[]): Map<string, Order[]> {
   });
 
   return customerMap;
+}
+
+export function getPeruProductsByCustomer(orders: Order[]): ProductCustomerQuantity[] {
+  const peruProducts: ProductCustomerQuantity[] = [];
+  const PERU_PRODUCTS = ['PERU RECHEADO', 'PERU SEM RECHEIO'];
+
+  orders.forEach((order) => {
+    order.products.forEach((product) => {
+      if (PERU_PRODUCTS.includes(product.product_name)) {
+        peruProducts.push({
+          product_name: product.product_name,
+          customer_name: order.client_name,
+          client_number: order.client_number,
+          quantity: product.quantity,
+        });
+      }
+    });
+  });
+
+  // Sort by product name first, then by customer name
+  return peruProducts.sort((a, b) => {
+    if (a.product_name !== b.product_name) {
+      return a.product_name.localeCompare(b.product_name);
+    }
+    return a.customer_name.localeCompare(b.customer_name);
+  });
 }
 

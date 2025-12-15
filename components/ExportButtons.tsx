@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Order, Product } from '@/types/order';
-import { ProductTotal, filterOrdersByDate, OrderDate, getTotalQuantityPerProduct } from '@/lib/analytics';
-import { exportAllProductsAndQuantities, exportAllCustomerSheets, exportAllProductsWithCustomers } from '@/lib/pdf-export';
+import { ProductTotal, filterOrdersByDate, OrderDate, getTotalQuantityPerProduct, getPeruProductsByCustomer } from '@/lib/analytics';
+import { exportAllProductsAndQuantities, exportAllCustomerSheets, exportAllProductsWithCustomers, exportPeruProducts } from '@/lib/pdf-export';
 
 interface ExportButtonsProps {
   orders: Order[];
@@ -58,6 +58,21 @@ export default function ExportButtons({ orders, totalQuantityPerProduct, product
     }
   };
 
+  const handleExportPeruProducts = () => {
+    try {
+      setExporting(true);
+      const filteredOrders = filterOrdersByDate(orders, selectedDate);
+      const peruData = getPeruProductsByCustomer(filteredOrders);
+      const dateLabel = selectedDate === 'all' ? undefined : selectedDate;
+      exportPeruProducts(peruData, dateLabel);
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      alert('Erro ao exportar perus. Por favor, tente novamente.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-lg shadow p-6 mb-8">
       <h2 className="text-xl font-semibold text-black dark:text-white mb-4">
@@ -79,7 +94,7 @@ export default function ExportButtons({ orders, totalQuantityPerProduct, product
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <button
           onClick={handleExportAllProducts}
           disabled={exporting}
@@ -102,6 +117,14 @@ export default function ExportButtons({ orders, totalQuantityPerProduct, product
           className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {exporting ? 'A exportar...' : 'Exportar Todas as Fichas de Cliente'}
+        </button>
+
+        <button
+          onClick={handleExportPeruProducts}
+          disabled={exporting}
+          className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {exporting ? 'A exportar...' : 'Exportar Perus (Recheado e Sem Recheio)'}
         </button>
       </div>
     </div>

@@ -490,6 +490,78 @@ export function exportAllProductsWithCustomers(
   doc.save(safeFilename);
 }
 
+export function exportPeruProducts(
+  data: ProductCustomerQuantity[],
+  date?: string,
+  filename?: string
+) {
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  let title = 'Perus (Recheado e Sem Recheio)';
+  if (date && date !== 'all') {
+    title += ` - ${date} de Dezembro`;
+  }
+  doc.text(title, 14, 22);
+  doc.setFontSize(12);
+  doc.text(`Gerado em: ${new Date().toLocaleString('pt-PT')}`, 14, 30);
+
+  const formatWeight = (quantity: number): string => {
+    return `${quantity.toFixed(3).replace(/\.?0+$/, '')} kg`;
+  };
+
+  autoTable(doc, {
+    startY: 35,
+    head: [['Produto', 'Cliente', 'Número', 'Peso (kg)']],
+    body: data.map((item) => [
+      item.product_name,
+      item.customer_name,
+      item.client_number,
+      formatWeight(item.quantity),
+    ]),
+    theme: 'striped',
+    headStyles: { fillColor: [0, 0, 0] },
+    styles: { fontSize: 10 },
+  });
+
+  // Calculate totals per product
+  const peruRecheadoTotal = data
+    .filter((item) => item.product_name === 'PERU RECHEADO')
+    .reduce((sum, item) => sum + item.quantity, 0);
+  const peruSemRecheioTotal = data
+    .filter((item) => item.product_name === 'PERU SEM RECHEIO')
+    .reduce((sum, item) => sum + item.quantity, 0);
+
+  // Calculate counts
+  const peruRecheadoCount = data.filter((item) => item.product_name === 'PERU RECHEADO').length;
+  const peruSemRecheioCount = data.filter((item) => item.product_name === 'PERU SEM RECHEIO').length;
+  const totalCount = peruRecheadoCount + peruSemRecheioCount;
+
+  const lastAutoTable = (doc as any).lastAutoTable;
+  let yPos = lastAutoTable ? lastAutoTable.finalY + 10 : 50;
+
+  if (yPos > 250) {
+    doc.addPage();
+    yPos = 20;
+  }
+
+  doc.setFontSize(12);
+  doc.text('Totais:', 14, yPos);
+  yPos += 7;
+  doc.setFontSize(10);
+  doc.text(`PERU RECHEADO: ${formatWeight(peruRecheadoTotal)} (${peruRecheadoCount} unidade${peruRecheadoCount !== 1 ? 's' : ''})`, 14, yPos);
+  yPos += 6;
+  doc.text(`PERU SEM RECHEIO: ${formatWeight(peruSemRecheioTotal)} (${peruSemRecheioCount} unidade${peruSemRecheioCount !== 1 ? 's' : ''})`, 14, yPos);
+  yPos += 6;
+  doc.setFontSize(11);
+  doc.text(`Total Geral: ${formatWeight(peruRecheadoTotal + peruSemRecheioTotal)} (${totalCount} unidade${totalCount !== 1 ? 's' : ''})`, 14, yPos);
+
+  const safeFilename = filename || (date && date !== 'all'
+    ? `perus-${date}-dezembro.pdf`
+    : 'perus.pdf');
+  doc.save(safeFilename);
+}
+
 function getPickupLocationLabel(location: string): string {
   const labels: Record<string, string> = {
     amoreira: 'Amoreira',

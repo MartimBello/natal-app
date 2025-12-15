@@ -124,7 +124,7 @@ export default function ExportButtons({ orders, totalQuantityPerProduct, product
           disabled={exporting}
           className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {exporting ? 'A exportar...' : 'Exportar Perus (Recheado e Sem Recheio)'}
+          {exporting ? 'A exportar...' : 'Exportar Perus'}
         </button>
       </div>
     </div>

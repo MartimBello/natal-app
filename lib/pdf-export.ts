@@ -498,7 +498,7 @@ export function exportPeruProducts(
   const doc = new jsPDF();
 
   doc.setFontSize(18);
-  let title = 'Perus (Recheado e Sem Recheio)';
+  let title = 'Perus';
   if (date && date !== 'all') {
     title += ` - ${date} de Dezembro`;
   }
@@ -531,11 +531,15 @@ export function exportPeruProducts(
   const peruSemRecheioTotal = data
     .filter((item) => item.product_name === 'PERU SEM RECHEIO')
     .reduce((sum, item) => sum + item.quantity, 0);
+  const pernaPeruTotal = data
+    .filter((item) => item.product_name === 'PERNA DE PERÚ COM RECHEIO À PARTE')
+    .reduce((sum, item) => sum + item.quantity, 0);
 
   // Calculate counts
   const peruRecheadoCount = data.filter((item) => item.product_name === 'PERU RECHEADO').length;
   const peruSemRecheioCount = data.filter((item) => item.product_name === 'PERU SEM RECHEIO').length;
-  const totalCount = peruRecheadoCount + peruSemRecheioCount;
+  const pernaPeruCount = data.filter((item) => item.product_name === 'PERNA DE PERÚ COM RECHEIO À PARTE').length;
+  const totalCount = peruRecheadoCount + peruSemRecheioCount + pernaPeruCount;
 
   const lastAutoTable = (doc as any).lastAutoTable;
   let yPos = lastAutoTable ? lastAutoTable.finalY + 10 : 50;
@@ -553,8 +557,10 @@ export function exportPeruProducts(
   yPos += 6;
   doc.text(`PERU SEM RECHEIO: ${formatWeight(peruSemRecheioTotal)} (${peruSemRecheioCount} unidade${peruSemRecheioCount !== 1 ? 's' : ''})`, 14, yPos);
   yPos += 6;
+  doc.text(`PERNA DE PERÚ COM RECHEIO À PARTE: ${formatWeight(pernaPeruTotal)} (${pernaPeruCount} unidade${pernaPeruCount !== 1 ? 's' : ''})`, 14, yPos);
+  yPos += 6;
   doc.setFontSize(11);
-  doc.text(`Total Geral: ${formatWeight(peruRecheadoTotal + peruSemRecheioTotal)} (${totalCount} unidade${totalCount !== 1 ? 's' : ''})`, 14, yPos);
+  doc.text(`Total Geral: ${formatWeight(peruRecheadoTotal + peruSemRecheioTotal + pernaPeruTotal)} (${totalCount} unidade${totalCount !== 1 ? 's' : ''})`, 14, yPos);
 
   const safeFilename = filename || (date && date !== 'all'
     ? `perus-${date}-dezembro.pdf`

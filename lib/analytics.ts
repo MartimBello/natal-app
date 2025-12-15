@@ -32,8 +32,10 @@ export function getTotalQuantityPerProduct(orders: Order[]): ProductTotal[] {
 
   orders.forEach((order) => {
     order.products.forEach((product) => {
-      // Exclude PERU RECHEADO and PERU SEM RECHEIO from totals
-      if (product.product_name === 'PERU RECHEADO' || product.product_name === 'PERU SEM RECHEIO') {
+      // Exclude PERU RECHEADO, PERU SEM RECHEIO, and PERNA DE PERÚ COM RECHEIO À PARTE from totals
+      if (product.product_name === 'PERU RECHEADO' ||
+          product.product_name === 'PERU SEM RECHEIO' ||
+          product.product_name === 'PERNA DE PERÚ COM RECHEIO À PARTE') {
         return;
       }
       const current = productMap.get(product.product_name) || 0;
@@ -97,7 +99,7 @@ export function getOrdersByCustomer(orders: Order[]): Map<string, Order[]> {
 
 export function getPeruProductsByCustomer(orders: Order[]): ProductCustomerQuantity[] {
   const peruProducts: ProductCustomerQuantity[] = [];
-  const PERU_PRODUCTS = ['PERU RECHEADO', 'PERU SEM RECHEIO'];
+  const PERU_PRODUCTS = ['PERU RECHEADO', 'PERU SEM RECHEIO', 'PERNA DE PERÚ COM RECHEIO À PARTE'];
 
   orders.forEach((order) => {
     order.products.forEach((product) => {

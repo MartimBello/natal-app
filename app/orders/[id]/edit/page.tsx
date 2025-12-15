@@ -10,6 +10,7 @@ const PICKUP_LOCATIONS: { value: PickupLocation; label: string }[] = [
   { value: 'amoreira', label: 'Amoreira' },
   { value: 'lisboa', label: 'Lisboa' },
   { value: 'casa', label: 'Casa' },
+  { value: 'cascais', label: 'Cascais' },
 ];
 
 export default function EditOrderPage() {

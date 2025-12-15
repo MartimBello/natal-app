@@ -1,4 +1,4 @@
-export type PickupLocation = 'amoreira' | 'lisboa' | 'casa';
+export type PickupLocation = 'amoreira' | 'lisboa' | 'casa' | 'cascais';
 
 export interface OrderProduct {
   id?: string;

@@ -495,6 +495,7 @@ function getPickupLocationLabel(location: string): string {
     amoreira: 'Amoreira',
     lisboa: 'Lisboa',
     casa: 'Casa',
+    cascais: 'Cascais',
   };
   return labels[location] || location;
 }

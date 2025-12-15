@@ -18,7 +18,7 @@ export interface Database {
           client_name: string
           client_number: string
           phone_number: string | null
-          pickup_location: 'amoreira' | 'lisboa' | 'casa'
+          pickup_location: 'amoreira' | 'lisboa' | 'casa' | 'cascais'
           pickup_date: string | null
           pickup_time: string | null
           address: string | null
@@ -30,7 +30,7 @@ export interface Database {
           client_name: string
           client_number?: string
           phone_number?: string | null
-          pickup_location: 'amoreira' | 'lisboa' | 'casa'
+          pickup_location: 'amoreira' | 'lisboa' | 'casa' | 'cascais'
           pickup_date?: string | null
           pickup_time?: string | null
           address?: string | null
@@ -42,7 +42,7 @@ export interface Database {
           client_name?: string
           client_number?: string
           phone_number?: string | null
-          pickup_location?: 'amoreira' | 'lisboa' | 'casa'
+          pickup_location?: 'amoreira' | 'lisboa' | 'casa' | 'cascais'
           pickup_date?: string | null
           pickup_time?: string | null
           address?: string | null

@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS orders (
   client_name TEXT NOT NULL,
   client_number TEXT,
   phone_number TEXT,
-  pickup_location TEXT NOT NULL CHECK (pickup_location IN ('amoreira', 'lisboa', 'casa')),
+  pickup_location TEXT NOT NULL CHECK (pickup_location IN ('amoreira', 'lisboa', 'casa', 'cascais')),
   pickup_date DATE,
   pickup_time TIME,
   address TEXT,

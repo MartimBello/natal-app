@@ -7,6 +7,7 @@ const PICKUP_LOCATIONS = {
   amoreira: 'Amoreira',
   lisboa: 'Lisboa',
   casa: 'Casa',
+  cascais: 'Cascais',
 };
 
 export default async function OrdersPage() {
